@@ -121,7 +121,7 @@ def main():
     # Fase 1: Exploração
     print_phase("Explorando")
     explorer = ExplorerAgent()
-    files = explorer.scan_repository(repo_path)
+    files = explorer.scan_directory(repo_path)
     print_success(f"Encontrei {len(files)} arquivos importantes")
 
     # Fase 2: Análise
