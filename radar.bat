@@ -1,5 +1,6 @@
 @echo off
 chcp 65001 > nul
+setlocal EnableDelayedExpansion
 
 :: Configura a janela
 title RADAR - Análise de Código
@@ -37,58 +38,49 @@ if exist guruenv\Scripts\activate.bat (
 echo Verificando configuração da API...
 echo.
 
-:: Se .env não existe, cria
-if not exist .env (
-    echo Arquivo .env não encontrado. Vamos criar um...
+:: Tenta ler a chave atual
+if exist .env (
+    for /f "tokens=2 delims==" %%a in ('type .env ^| findstr "GOOGLE_API_KEY"') do set "API_KEY=%%a"
+)
+
+:: Se não existe .env ou a chave está vazia, pede uma nova
+if not defined API_KEY (
+    goto :pedir_chave
+)
+
+:: Verifica se a chave parece válida
+echo !API_KEY! | findstr /r /c:"^AIza[a-zA-Z0-9_-]\{35,40\}$" >nul
+if errorlevel 1 (
+    echo [AVISO] A chave da API no arquivo .env parece inválida!
     echo.
-    echo Para obter sua chave:
-    echo 1. Acesse https://makersuite.google.com/app/apikey
-    echo 2. Faça login com sua conta Google
-    echo 3. Clique em "Create API Key"
-    echo 4. Copie a chave gerada
+    echo A chave deve começar com 'AIza' e ter cerca de 40 caracteres.
     echo.
-    set /p API_KEY="Cole sua chave da API Google aqui: "
-    echo GOOGLE_API_KEY=%API_KEY%> .env
-    echo.
-    echo Arquivo .env criado com sucesso!
-    echo.
-) else (
-    :: Verifica se a chave parece válida
-    findstr /C:"GOOGLE_API_KEY=AIza" .env > nul
-    if errorlevel 1 (
-        echo [AVISO] A chave da API no arquivo .env parece inválida!
-        echo.
-        echo O arquivo .env existe mas a chave não parece correta.
-        echo A chave deve começar com 'AIza' e ter cerca de 40 caracteres.
-        echo.
-        echo Quer configurar uma nova chave? (S/N)
-        set /p RESPOSTA="Digite S para sim ou N para não: "
-        if /I "!RESPOSTA!"=="S" (
-            del .env
-            echo.
-            echo Para obter sua chave:
-            echo 1. Acesse https://makersuite.google.com/app/apikey
-            echo 2. Faça login com sua conta Google
-            echo 3. Clique em "Create API Key"
-            echo 4. Copie a chave gerada
-            echo.
-            set /p API_KEY="Cole sua chave da API Google aqui: "
-            echo GOOGLE_API_KEY=%API_KEY%> .env
-            echo.
-            echo Arquivo .env atualizado com sucesso!
-            echo.
-        ) else (
-            echo.
-            echo Configure o arquivo .env manualmente e rode novamente.
-            pause
-            exit /b 1
-        )
-    )
+    goto :pedir_chave
 )
 
 :: Roda o programa
 python main.py
+goto :fim
 
-:: Espera input antes de fechar
+:pedir_chave
+echo Para obter sua chave:
+echo 1. Acesse https://makersuite.google.com/app/apikey
+echo 2. Faça login com sua conta Google
+echo 3. Clique em "Create API Key"
+echo 4. Copie a chave gerada
 echo.
-pause 
+set /p "API_KEY=Cole sua chave da API Google aqui: "
+echo.
+
+:: Salva a nova chave
+echo GOOGLE_API_KEY=!API_KEY!> .env
+echo Chave salva com sucesso!
+echo.
+
+:: Roda o programa
+python main.py
+
+:fim
+echo.
+pause
+endlocal 
