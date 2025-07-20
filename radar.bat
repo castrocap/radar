@@ -33,6 +33,18 @@ if exist guruenv\Scripts\activate.bat (
     pip install -r requirements.txt
 )
 
+:: Verifica/cria .env
+if not exist .env (
+    echo.
+    echo Arquivo .env não encontrado. Vamos criar um...
+    echo.
+    set /p API_KEY="Cole sua chave da API Google aqui: "
+    echo GOOGLE_API_KEY=%API_KEY%> .env
+    echo.
+    echo Arquivo .env criado com sucesso!
+    echo.
+)
+
 :: Roda o programa
 python main.py
 
