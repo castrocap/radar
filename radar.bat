@@ -1,4 +1,4 @@
-@echo on
+@echo off
 chcp 65001 > nul
 title RADAR - Análise de Código
 color 0F
@@ -15,15 +15,16 @@ echo.
 pause
 exit /b 1
 
-:: Verifica se está no diretório correto
-echo Verificando diretório...
-cd /d "%~dp0"
-
+:: Limpa a tela e mostra cabeçalho
 cls
 echo ========================================================
 echo                RADAR - Análise de Código
 echo ========================================================
 echo.
+
+:: Verifica se está no diretório correto
+echo Verificando diretório...
+cd /d "%~dp0"
 
 :: Lista arquivos necessários
 echo Verificando arquivos...
@@ -39,18 +40,12 @@ for %%f in (%arquivos_necessarios%) do (
 
 :: Se faltam arquivos, mostra erro
 if not "!faltando!"=="" (
-    echo [ERRO] Arquivos necessários não encontrados:!faltando!
-    echo.
-    echo Arquivos presentes no diretório:
-    dir /b
-    echo.
-    pause
-    exit /b 1
+    call :erro "Arquivos necessários não encontrados:!faltando!"
 )
 
 :: Verifica Python
 echo Verificando Python...
-python --version
+python --version > nul 2>&1
 if errorlevel 1 (
     call :erro "Python não encontrado! Instale Python 3.9 ou superior."
 )
@@ -101,13 +96,11 @@ echo.
 :: Executa com saída detalhada
 python main.py
 if errorlevel 1 (
-    echo.
-    echo [ERRO] O RADAR encontrou um problema! Veja os detalhes acima.
-    echo.
-    pause
-    exit /b 1
+    call :erro "O RADAR encontrou um problema! Veja os detalhes acima."
 )
 
+echo.
+echo Análise concluída com sucesso!
 echo.
 echo Pressione qualquer tecla para fechar...
 pause > nul
