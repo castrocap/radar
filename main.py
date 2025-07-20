@@ -73,6 +73,10 @@ def open_documentation(output_dir):
 def check_environment():
     """Verifica se o ambiente está configurado corretamente"""
     import os
+    from dotenv import load_dotenv
+    
+    # Carrega variáveis de ambiente
+    load_dotenv()
     
     # Verifica chave da API
     api_key = os.getenv("GOOGLE_API_KEY")
