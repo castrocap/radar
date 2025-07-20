@@ -8,6 +8,10 @@ setlocal EnableDelayedExpansion
 :erro
 echo.
 echo [ERRO] %~1
+echo.
+echo Arquivos encontrados no diretório:
+dir /b
+echo.
 pause
 exit /b 1
 
@@ -20,21 +24,33 @@ echo                RADAR - Análise de Código
 echo ========================================================
 echo.
 
+:: Lista arquivos necessários
+set "arquivos_necessarios=main.py agents.py requirements.txt"
+set "faltando="
+
+:: Verifica cada arquivo
+for %%f in (%arquivos_necessarios%) do (
+    if not exist "%%f" (
+        set "faltando=!faltando! %%f"
+    )
+)
+
+:: Se faltam arquivos, mostra erro
+if not "!faltando!"=="" (
+    echo [ERRO] Arquivos necessários não encontrados:!faltando!
+    echo.
+    echo Arquivos presentes no diretório:
+    dir /b
+    echo.
+    pause
+    exit /b 1
+)
+
 :: Verifica Python
 echo Verificando ambiente...
 python --version > nul 2>&1
 if errorlevel 1 (
     call :erro "Python não encontrado! Instale Python 3.9 ou superior."
-)
-
-:: Verifica se requirements.txt existe
-if not exist requirements.txt (
-    call :erro "Arquivo requirements.txt não encontrado!"
-)
-
-:: Verifica se main.py existe
-if not exist main.py (
-    call :erro "Arquivo main.py não encontrado!"
 )
 
 :: Ativa ambiente virtual
@@ -60,13 +76,15 @@ echo.
 echo Iniciando análise...
 echo.
 
-:: Captura saída do Python em variável
-set "temp_file=%TEMP%\radar_output.txt"
-python main.py > "%temp_file%" 2>&1
-
-:: Mostra saída e mantém na tela
-type "%temp_file%"
-del "%temp_file%" > nul 2>&1
+:: Executa com saída detalhada
+python main.py 2>&1
+if errorlevel 1 (
+    echo.
+    echo [ERRO] O RADAR encontrou um problema! Veja os detalhes acima.
+    echo.
+    pause
+    exit /b 1
+)
 
 echo.
 echo Pressione qualquer tecla para fechar...
