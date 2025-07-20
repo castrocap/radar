@@ -103,6 +103,8 @@ def main():
         api_key = os.getenv("GOOGLE_API_KEY")
         explorer = ExplorerAgent()
         analyzer = CodeAnalyzerAgent()
+        business = BusinessAnalystAgent(api_key=api_key)
+        translator = TranslatorAgent(api_key=api_key)
         doc_agent = DocumentationAgent()
 
         # Fase 1: Exploração
@@ -117,13 +119,11 @@ def main():
 
         # Fase 3: Documentação
         print_phase("Documentando")
-        business = BusinessAnalystAgent(api_key=api_key)
-        docs = business.generate_overview(analysis)
+        docs = business.generate_overview(files, analysis)
         print_success("Documentação gerada")
 
         # Fase 4: Tradução
         print_phase("Finalizando")
-        translator = TranslatorAgent(api_key=api_key)
         final_docs = translator.translate_documentation(docs)
         
         # Salva documentação
