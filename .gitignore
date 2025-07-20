@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+env/
+
+# IDEs
+.idea/
+.vscode/
+
+# Environment
+.env
+
+# Output
+output/
+
+# Credentials
+*.json
+token.json
+client_secrets.json 
