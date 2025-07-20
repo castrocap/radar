@@ -127,7 +127,12 @@ def main():
         final_docs = translator.translate_documentation(docs)
         
         # Salva documentação
-        output_dir = doc_agent.save_documentation(final_docs, repo_path)
+        output_dir = doc_agent.save_documentation(
+            overview=final_docs["overview"],
+            core_files_analysis=final_docs["core_files"],
+            base_dir=repo_path,
+            translator=translator
+        )
         print_success("Tudo pronto!")
         
         print_completion(output_dir)
