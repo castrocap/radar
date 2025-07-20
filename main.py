@@ -127,7 +127,7 @@ def main():
     # Fase 2: Análise
     print_phase("Analisando")
     analyzer = CodeAnalyzerAgent()
-    analysis = analyzer.analyze_files(files)
+    analysis = analyzer.analyze_codebase(files)
     print_success("Análise completa")
 
     # Fase 3: Documentação
