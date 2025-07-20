@@ -71,39 +71,17 @@ def open_documentation(output_dir):
             subprocess.run(["xdg-open", file], check=False)
 
 def check_environment():
-    """Verifica e valida o ambiente necessário."""
-    print("Verificando ambiente...")
+    """Verifica se o ambiente está configurado corretamente"""
+    import os
     
-    # Verifica se .env existe
-    if not os.path.exists('.env'):
-        print("\nArquivo .env não encontrado!")
-        print("1. Crie um arquivo .env na raiz do projeto")
-        print("2. Adicione sua chave da API do Google Gemini:")
-        print("   GOOGLE_API_KEY=sua_chave_aqui")
-        print("\nPara obter uma chave:")
-        print("1. Acesse https://makersuite.google.com/app/apikey")
-        print("2. Faça login com sua conta Google")
-        print("3. Crie uma nova chave de API")
-        print("4. Copie a chave e adicione ao arquivo .env")
-        return False
-    
-    # Carrega variáveis de ambiente
-    load_dotenv()
-    
-    # Verifica GOOGLE_API_KEY
+    # Verifica chave da API
     api_key = os.getenv("GOOGLE_API_KEY")
     if not api_key:
-        print("\nChave da API do Google Gemini não encontrada no arquivo .env!")
-        print("Adicione sua chave usando o formato:")
-        print("GOOGLE_API_KEY=sua_chave_aqui")
+        print("\n❌ Chave da API Google não encontrada!")
+        print("   1. Crie um arquivo .env na pasta do projeto")
+        print("   2. Adicione sua chave: GOOGLE_API_KEY=sua_chave_aqui")
+        print("   3. Rode o programa novamente")
         return False
-        
-    if api_key.lower() in ['sua_chave_aqui', 'your_key_here', 'chave']:
-        print("\nChave da API do Google Gemini não foi configurada!")
-        print("Substitua o valor padrão pela sua chave real no arquivo .env")
-        return False
-    
-    print("✓ Ambiente configurado corretamente.")
     return True
 
 def main():
@@ -111,46 +89,56 @@ def main():
     
     # Verifica ambiente
     print("Verificando ambiente...")
-    check_environment()
+    if not check_environment():
+        return
     print_success("Tudo certo!")
 
     # Pega caminho do repositório
     repo_path = input("Qual pasta você quer analisar? ")
     print()
 
-    # Fase 1: Exploração
-    print_phase("Explorando")
-    explorer = ExplorerAgent()
-    files = explorer.scan_directory(repo_path)
-    print_success(f"Encontrei {len(files)} arquivos importantes")
+    try:
+        # Inicializa agentes
+        api_key = os.getenv("GOOGLE_API_KEY")
+        explorer = ExplorerAgent()
+        analyzer = CodeAnalyzerAgent()
+        business = BusinessAnalystAgent(api_key=api_key)
+        translator = TranslatorAgent(api_key=api_key)
+        doc_agent = DocumentationAgent()
 
-    # Fase 2: Análise
-    print_phase("Analisando")
-    analyzer = CodeAnalyzerAgent()
-    analysis = analyzer.analyze_codebase(files)
-    print_success("Análise completa")
+        # Fase 1: Exploração
+        print_phase("Explorando")
+        files = explorer.scan_directory(repo_path)
+        print_success(f"Encontrei {len(files)} arquivos importantes")
 
-    # Fase 3: Documentação
-    print_phase("Documentando")
-    business = BusinessAnalystAgent()
-    docs = business.generate_documentation(analysis)
-    print_success("Documentação gerada")
+        # Fase 2: Análise
+        print_phase("Analisando")
+        analysis = analyzer.analyze_codebase(files)
+        print_success("Análise completa")
 
-    # Fase 4: Tradução
-    print_phase("Finalizando")
-    translator = TranslatorAgent()
-    final_docs = translator.translate_documentation(docs)
-    
-    # Salva documentação
-    doc_agent = DocumentationAgent()
-    output_dir = doc_agent.save_documentation(final_docs, repo_path)
-    print_success("Tudo pronto!")
-    
-    print_completion(output_dir)
-    
-    # Abre documentação na IDE
-    print("Abrindo documentação...")
-    open_documentation(output_dir)
+        # Fase 3: Documentação
+        print_phase("Documentando")
+        docs = business.generate_documentation(analysis)
+        print_success("Documentação gerada")
+
+        # Fase 4: Tradução
+        print_phase("Finalizando")
+        final_docs = translator.translate_documentation(docs)
+        
+        # Salva documentação
+        output_dir = doc_agent.save_documentation(final_docs, repo_path)
+        print_success("Tudo pronto!")
+        
+        print_completion(output_dir)
+        
+        # Abre documentação na IDE
+        print("Abrindo documentação...")
+        open_documentation(output_dir)
+
+    except Exception as e:
+        print(f"\n❌ Ops! Algo deu errado: {str(e)}")
+        print("   Se o problema persistir, fale com o time de tecnologia.")
+        return
 
 if __name__ == "__main__":
     main() 
