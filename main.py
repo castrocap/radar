@@ -119,8 +119,25 @@ def main():
 
         # Fase 3: Documentação
         print_phase("Documentando")
+        
+        # Gera visão geral
         overview = business.generate_overview(files, analysis)
-        core_files = business.analyze_core_files(files[:len(files)//5], analysis)  # Top 20%
+        
+        # Analisa arquivos principais (top 20%)
+        print("Analisando componentes principais...")
+        core_files = {}
+        total_core = len(files) // 5  # Top 20%
+        for i, file_info in enumerate(files[:total_core]):
+            progress = ((i + 1) / total_core) * 100
+            print(f"\rProgresso: {progress:.1f}% ({i+1}/{total_core})", end="", flush=True)
+            
+            try:
+                file_analysis = business.analyze_core_file(file_info, analysis)
+                core_files[file_info["relative_path"]] = file_analysis
+            except Exception as e:
+                print(f"\nFalha ao analisar {file_info['relative_path']}: {e}")
+        
+        print("\n✓ Análise dos componentes concluída")
         print_success("Documentação gerada")
 
         # Fase 4: Tradução
