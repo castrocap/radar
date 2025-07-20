@@ -142,25 +142,51 @@ def main():
 
         # Fase 4: Tradução
         print_phase("Finalizando")
-        translated_overview = translator.translate_documentation(overview)
-        translated_core_files = {
-            path: translator.translate_documentation(analysis)
-            for path, analysis in core_files.items()
-        }
+        
+        print("Traduzindo documentação...")
+        try:
+            translated_overview = translator.translate_documentation(overview)
+            print("✓ Visão geral traduzida")
+            
+            print("\nTraduzindo análises de componentes...")
+            translated_core_files = {}
+            total_files = len(core_files)
+            for i, (path, analysis) in enumerate(core_files.items()):
+                progress = ((i + 1) / total_files) * 100
+                print(f"\rProgresso: {progress:.1f}% ({i+1}/{total_files})", end="", flush=True)
+                translated_core_files[path] = translator.translate_documentation(analysis)
+            print("\n✓ Análises traduzidas")
+            
+        except Exception as e:
+            print(f"\n❌ Erro na tradução: {str(e)}")
+            raise
         
         # Salva documentação
-        output_dir = doc_agent.save_documentation(
-            overview=translated_overview,
-            core_files_analysis=translated_core_files,
-            base_dir=repo_path
-        )
-        print_success("Tudo pronto!")
+        print("\nSalvando documentação...")
+        try:
+            output_dir = doc_agent.save_documentation(
+                overview=translated_overview,
+                core_files_analysis=translated_core_files,
+                base_dir=repo_path
+            )
+            print(f"✓ Documentação salva em: {output_dir}")
+            
+        except Exception as e:
+            print(f"\n❌ Erro ao salvar documentação: {str(e)}")
+            raise
         
+        print_success("Tudo pronto!")
         print_completion(output_dir)
         
         # Abre documentação na IDE
-        print("Abrindo documentação...")
-        open_documentation(output_dir)
+        print("\nAbrindo documentação...")
+        try:
+            open_documentation(output_dir)
+            print("✓ Arquivos abertos na sua IDE")
+        except Exception as e:
+            print(f"\n⚠️ Não foi possível abrir os arquivos: {str(e)}")
+            print("  Você pode encontrar a documentação em:")
+            print(f"  {output_dir}")
 
     except Exception as e:
         print(f"\n❌ Ops! Algo deu errado: {str(e)}")
