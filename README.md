@@ -1,4 +1,4 @@
-# RADAR - Repository Analysis & Documentation Automated Report
+# RADAR
 
 <div align="center">
 
@@ -8,88 +8,88 @@
 
 </div>
 
-## Visão Geral
+## Sobre o Projeto
 
-RADAR (Repository Analysis & Documentation Automated Report) é uma solução corporativa de análise e documentação automatizada desenvolvida para a Capitania Investimentos. Utilizando inteligência artificial avançada através da API Google Gemini, o sistema realiza análise profunda de repositórios de código, gerando documentação técnica padronizada e facilitando a compreensão de sistemas complexos.
+O RADAR é uma ferramenta desenvolvida pela Capitania Investimentos para análise e documentação automática de código. Usando inteligência artificial, ele mapeia, entende e documenta repositórios inteiros de forma rápida e precisa.
 
-## Arquitetura do Sistema
+## Como Funciona
 
-O RADAR implementa uma arquitetura distribuída e hierárquica, composta por camadas especializadas de processamento:
+Nossa arquitetura é distribuída em camadas especializadas:
 
-### Master Intelligence Agent
+### Agente Principal
 
-Componente central responsável por:
-- Alocação dinâmica de recursos computacionais
-- Orquestração de agentes especializados
-- Validação e controle de qualidade
-- Gestão de processamento paralelo
+O cérebro do sistema que:
+- Distribui recursos de processamento
+- Coordena os agentes especializados
+- Garante qualidade das entregas
+- Gerencia processamento em paralelo
 
-### Camada de Processamento Paralelo
+### Processamento Paralelo
 
-**Repository Explorer**
-- Análise estrutural do repositório
-- Mapeamento de componentes
-- Identificação de padrões arquiteturais
+**Explorador**
+- Mapeia a estrutura do repositório
+- Identifica componentes principais
+- Detecta padrões de arquitetura
 
-**Code Analyzer**
-- Análise sintática e semântica
-- Identificação de padrões técnicos
-- Extração de métricas de código
+**Analisador de Código**
+- Avalia sintaxe e semântica
+- Identifica padrões técnicos
+- Extrai métricas importantes
 
-**Dependency Analyzer**
-- Mapeamento de dependências internas/externas
-- Análise de integrações
-- Avaliação de componentes críticos
+**Analisador de Dependências**
+- Mapeia conexões entre componentes
+- Avalia integrações
+- Identifica pontos críticos
 
-### Camada de Inteligência de Negócio
+### Inteligência de Negócio
 
-**Business Intelligence**
-- Análise de domínio
-- Contextualização de negócio
-- Identificação de regras de negócio
+**Analista de Negócio**
+- Entende o domínio
+- Contextualiza funcionalidades
+- Mapeia regras de negócio
 
-**Architecture Analyst**
-- Avaliação de design de sistema
-- Análise de padrões arquiteturais
-- Recomendações de arquitetura
+**Analista de Arquitetura**
+- Avalia design do sistema
+- Analisa padrões
+- Sugere melhorias
 
-**Security Analyst**
-- Avaliação de riscos
-- Identificação de vulnerabilidades
-- Recomendações de segurança
+**Analista de Segurança**
+- Avalia riscos
+- Identifica pontos sensíveis
+- Propõe melhorias
 
-### Camada de Documentação
+### Documentação
 
-**Technical Writer**
-- Geração de documentação técnica
-- Especificações de sistema
-- Documentação de arquitetura
+**Documentador Técnico**
+- Gera documentação técnica
+- Especifica componentes
+- Documenta arquitetura
 
-**Language Processing**
-- Tradução técnica para português
-- Preservação de terminologia
-- Consistência documental
+**Processador de Texto**
+- Ajusta linguagem
+- Mantém termos técnicos
+- Garante consistência
 
-**Documentation Integrator**
-- Consolidação de documentação
-- Formatação padronizada
-- Controle de versão
+**Integrador**
+- Junta toda documentação
+- Padroniza formato
+- Controla versões
 
-## Instalação
+## Como Usar
 
-### Pré-requisitos
+### Requisitos
 - Python 3.9+
-- Chave de API do Google Gemini
+- Chave da API Google Gemini
 
-### Procedimento de Instalação
+### Instalação
 
-1. **Clone do Repositório**
+1. **Baixe o código**
 ```bash
 git clone https://github.com/castrocap/radar.git
 cd radar
 ```
 
-2. **Configuração de Ambiente**
+2. **Configure o ambiente**
 ```bash
 # Windows
 install_guruenv.bat
@@ -100,24 +100,24 @@ source guruenv/bin/activate
 pip install -r requirements.txt
 ```
 
-3. **Configuração da API Google Gemini**
+3. **Configure sua chave API**
 
-a) Obtenção de Credenciais:
-   - Acesse https://makersuite.google.com/app/apikey
-   - Autentique-se com credenciais Google
-   - Gere nova chave de API
-   - Copie a chave gerada
+a) Pegue sua chave:
+   - Entre em https://makersuite.google.com/app/apikey
+   - Faça login
+   - Crie uma chave
+   - Copie ela
 
-b) Configuração Local:
-   - Crie arquivo `.env` na raiz do projeto
-   - Configure a chave:
+b) Configure:
+   - Crie um arquivo `.env`
+   - Coloque sua chave:
      ```env
      GOOGLE_API_KEY=sua_chave_aqui
      ```
 
-## Utilização
+## Usando
 
-1. **Execução**
+1. **Rode o programa**
 ```bash
 # Windows
 radar.bat
@@ -126,65 +126,65 @@ radar.bat
 python main.py
 ```
 
-2. **Análise de Repositório**
-- Forneça o caminho completo do repositório alvo
-- O sistema criará diretório `RADAR/` contendo:
-  - `VISAO_GERAL.md`: Documentação geral
-  - `componentes/`: Análises detalhadas
+2. **Analise seu código**
+- Digite o caminho da pasta
+- O RADAR vai criar uma pasta `RADAR/` com:
+  - `VISAO_GERAL.md`: Resumo geral
+  - `componentes/`: Detalhes técnicos
 
-## Estrutura de Documentação
+## O Que Você Recebe
 
-### Documentação Geral (VISAO_GERAL.md)
-- Visão geral do sistema
-- Arquitetura e componentes
-- Funcionalidades principais
-- Fluxos de dados
-- Componentes críticos
-- Stack tecnológico
+### Visão Geral
+- Resumo do sistema
+- Como funciona
+- Principais funções
+- Como os dados fluem
+- Partes importantes
+- Tecnologias usadas
 
-### Documentação de Componentes
-- Propósito e responsabilidades
-- Interfaces e contratos
-- Dependências e integrações
-- Fluxos de processamento
-- Considerações técnicas
+### Detalhes dos Componentes
+- Para que serve
+- Como se conecta
+- Do que depende
+- Como processa
+- Pontos importantes
 
-## Tecnologias Utilizadas
+## Tecnologias
 
-- **Core**: Python 3.9+
-- **IA**: Google Gemini API
-- **Processamento**: ThreadPoolExecutor
-- **Documentação**: Markdown
+- **Base**: Python 3.9+
+- **IA**: API Google Gemini
+- **Performance**: ThreadPoolExecutor
+- **Docs**: Markdown
 
-## Componentes do Sistema
+## Arquivos Principais
 
-- `main.py`: Módulo principal
-- `agents.py`: Implementação de agentes
-- `radar.bat`: Script de execução (Windows)
-- `.env`: Configurações (não versionado)
-- `.env.example`: Template de configuração
-- `.gitignore`: Controle de versionamento
+- `main.py`: Programa principal
+- `agents.py`: Nossos agentes
+- `radar.bat`: Atalho Windows
+- `.env`: Suas configurações
+- `.env.example`: Exemplo
+- `.gitignore`: Controle git
 
-## Diretrizes de Segurança
+## Segurança
 
-- Não versionar arquivo `.env`
-- Não compartilhar credenciais de API
-- Utilizar `.gitignore` fornecido
-- Seguir práticas de segurança corporativas
+- Nunca compartilhe seu `.env`
+- Proteja sua chave API
+- Use o `.gitignore`
+- Siga as práticas da empresa
 
-## Licença
+## Direitos
 
-Este software é propriedade da Capitania Investimentos.
+Propriedade da Capitania Investimentos.
 
-## Suporte
+## Ajuda
 
-Para suporte técnico:
-- Consulte a documentação
-- Verifique configuração da API
-- Contate equipe de tecnologia da Capitania Investimentos
+Precisa de ajuda?
+- Leia o manual acima
+- Confira sua API
+- Fale com o time de tecnologia
 
 ---
 
 <div align="center">
-Capitania Investimentos - Tecnologia
+Capitania Investimentos
 </div> 
