@@ -2,6 +2,9 @@
 chcp 65001 > nul
 setlocal
 
+:: Verifica se está no diretório correto
+cd /d "%~dp0"
+
 :: Ativa ambiente virtual
 if exist guruenv\Scripts\activate.bat (
     call guruenv\Scripts\activate.bat
