@@ -6,17 +6,69 @@ from dotenv import load_dotenv
 from agents import ExplorerAgent, CodeAnalyzerAgent, BusinessAnalystAgent, DocumentationAgent, TranslatorAgent
 
 def print_header():
-    """Prints a clean, professional header."""
-    print("\n" + "="*70)
-    print(" "*25 + "RADAR - Análise Técnica")
-    print(" "*15 + "Repository Analysis & Documentation Automated Report")
-    print("="*70 + "\n")
+    print("\n" + "=" * 70)
+    print("RADAR - Análise de Código".center(70))
+    print("=" * 70 + "\n")
+    print("Vamos analisar seu código e gerar uma documentação completa.")
+    print("É rápido e fácil.\n")
 
-def print_section(title: str):
-    """Prints a section header."""
-    print(f"\n{'-'*70}")
-    print(f" {title}")
-    print(f"{'-'*70}\n")
+def print_progress(phase, message, progress=None):
+    if progress is None:
+        print(f"→ {message}")
+    else:
+        print(f"→ {message} ({progress}%)")
+
+def print_success(message):
+    print(f"✓ {message}\n")
+
+def print_phase(name):
+    print("\n" + "-" * 70)
+    print(f" {name} ".center(70, "-"))
+    print("-" * 70 + "\n")
+
+def print_completion(output_dir):
+    print("\nPronto! Sua documentação está em:")
+    print(f"  {output_dir}/")
+    print("  ├─ VISAO_GERAL.md")
+    print("  └─ componentes/\n")
+
+def open_documentation(output_dir):
+    """Abre os arquivos gerados na IDE preferencial"""
+    import os
+    import subprocess
+    from pathlib import Path
+
+    # Lista todos os arquivos markdown gerados
+    docs_path = Path(output_dir)
+    markdown_files = [
+        str(docs_path / "VISAO_GERAL.md"),
+        *[str(f) for f in (docs_path / "componentes").glob("*.md")]
+    ]
+
+    # Tenta abrir no Cursor primeiro
+    try:
+        for file in markdown_files:
+            subprocess.run(["cursor", file], check=False)
+        return
+    except FileNotFoundError:
+        pass
+
+    # Tenta VS Code
+    try:
+        for file in markdown_files:
+            subprocess.run(["code", file], check=False)
+        return
+    except FileNotFoundError:
+        pass
+
+    # Fallback para notepad no Windows
+    if os.name == 'nt':
+        for file in markdown_files:
+            subprocess.run(["notepad", file], check=False)
+    # Fallback para sistemas Unix-like
+    else:
+        for file in markdown_files:
+            subprocess.run(["xdg-open", file], check=False)
 
 def check_environment():
     """Verifica e valida o ambiente necessário."""
@@ -55,118 +107,50 @@ def check_environment():
     return True
 
 def main():
-    """
-    Main orchestration script for RADAR.
-    Generates standardized technical documentation for code repositories.
-    """
-    # 1. SETUP
     print_header()
     
-    print("Esta ferramenta analisa e documenta seu repositório de código de forma automática.")
-    print("O processo é otimizado e leva apenas alguns minutos.\n")
-
     # Verifica ambiente
-    if not check_environment():
-        print("\nConfigure o ambiente e tente novamente.")
-        return
+    print("Verificando ambiente...")
+    check_environment()
+    print_success("Tudo certo!")
 
-    # Instantiate agents
+    # Pega caminho do repositório
+    repo_path = input("Qual pasta você quer analisar? ")
+    print()
+
+    # Fase 1: Exploração
+    print_phase("Explorando")
     explorer = ExplorerAgent()
-    code_analyzer = CodeAnalyzerAgent()
+    files = explorer.scan_repository(repo_path)
+    print_success(f"Encontrei {len(files)} arquivos importantes")
+
+    # Fase 2: Análise
+    print_phase("Analisando")
+    analyzer = CodeAnalyzerAgent()
+    analysis = analyzer.analyze_files(files)
+    print_success("Análise completa")
+
+    # Fase 3: Documentação
+    print_phase("Documentando")
+    business = BusinessAnalystAgent()
+    docs = business.generate_documentation(analysis)
+    print_success("Documentação gerada")
+
+    # Fase 4: Tradução
+    print_phase("Finalizando")
+    translator = TranslatorAgent()
+    final_docs = translator.translate_documentation(docs)
+    
+    # Salva documentação
     doc_agent = DocumentationAgent()
-    try:
-        api_key = os.getenv("GOOGLE_API_KEY")
-        business_analyst = BusinessAnalystAgent(api_key=api_key)
-        translator = TranslatorAgent(api_key=api_key)
-    except ValueError as e:
-        print(f"Erro: {e}. Verifique o arquivo .env.")
-        return
-
-    # Get target directory from user
-    target_directory = input("Informe o caminho do repositório a ser analisado: ")
-    if not os.path.isdir(target_directory):
-        print(f"\nErro: Diretório '{target_directory}' não encontrado.")
-        return
-
-    try:
-        # 2. SCAN FILES
-        print_section("Fase 1: Varredura Inicial")
-        print(f"Mapeando estrutura do repositório: '{target_directory}'")
-        all_files_info = explorer.scan_directory(path=target_directory)
-        if not all_files_info:
-            print("\nNenhum arquivo de código encontrado para análise.")
-            return
-        print(f"✓ {len(all_files_info)} arquivos mapeados.")
-
-        # 3. ANALYZE CODEBASE
-        print_section("Fase 2: Análise Estrutural")
-        print("Processando arquitetura e dependências...")
-        codebase_analysis = code_analyzer.analyze_codebase(all_files_info)
-        print("✓ Análise estrutural concluída.")
-        
-        # 4. GENERATE DOCUMENTATION
-        print_section("Fase 3: Geração de Relatórios")
-        
-        # Generate main overview
-        print("Elaborando visão geral do projeto...")
-        overview = business_analyst.generate_overview(all_files_info, codebase_analysis)
-        print("✓ Visão geral concluída.")
-        
-        # Analyze core files (top 20% by importance)
-        print("\nAnalisando componentes principais...")
-        core_files_analysis = {}
-        core_files = all_files_info[:len(all_files_info)//5]  # Top 20%
-        total_core = len(core_files)
-        
-        with ThreadPoolExecutor(max_workers=min(8, total_core)) as executor:
-            future_to_file = {
-                executor.submit(
-                    business_analyst.analyze_core_file, 
-                    file_info,
-                    codebase_analysis
-                ): file_info 
-                for file_info in core_files
-            }
-            
-            completed = 0
-            for future in future_to_file:
-                file_info = future_to_file[future]
-                try:
-                    completed += 1
-                    progress = (completed / total_core) * 100
-                    print(f"\rProgresso: {progress:.1f}% ({completed}/{total_core})", end="", flush=True)
-                    
-                    analysis = future.result()
-                    core_files_analysis[file_info['relative_path']] = analysis
-                except Exception as e:
-                    print(f"\nFalha ao analisar {file_info['relative_path']}: {e}")
-            print("\n✓ Análise dos componentes concluída.")
-
-        # 5. TRANSLATE & SAVE DOCUMENTATION
-        print_section("Fase 4: Tradução e Finalização")
-        print("Traduzindo documentação para português...")
-        radar_dir = doc_agent.save_documentation(
-            overview=overview,
-            core_files_analysis=core_files_analysis,
-            base_dir=target_directory,
-            translator=translator
-        )
-        print("✓ Tradução concluída.")
-        
-        print("\nProcesso concluído com sucesso!")
-        print("\nDocumentação gerada em:")
-        print(f"  {radar_dir}/")
-        print("  ├─ VISAO_GERAL.md")
-        print("  └─ componentes/")
-        print("\nPróximos passos:")
-        print("  1. Valide a documentação gerada")
-        print("  2. Compartilhe com a equipe")
-        print("  3. Atualize conforme necessário")
-        print("\n" + "="*70)
-
-    except Exception as e:
-        print(f"\nErro inesperado: {e}")
-        print("Entre em contato com o time de tecnologia.")
+    output_dir = doc_agent.save_documentation(final_docs, repo_path)
+    print_success("Tudo pronto!")
+    
+    print_completion(output_dir)
+    
+    # Abre documentação na IDE
+    print("Abrindo documentação...")
+    open_documentation(output_dir)
 
 if __name__ == "__main__":
     main() 

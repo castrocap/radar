@@ -1,13 +1,21 @@
 @echo off
-chcp 65001 >nul
-title RADAR - Análise Técnica
-color 1F
+chcp 65001 > nul
+setlocal
 
-REM Ativa o ambiente virtual
-call guruenv\Scripts\activate
+:: Ativa ambiente virtual
+if exist guruenv\Scripts\activate.bat (
+    call guruenv\Scripts\activate.bat
+) else (
+    echo Configurando ambiente...
+    python -m venv guruenv
+    call guruenv\Scripts\activate.bat
+    pip install -r requirements.txt
+)
 
-REM Executa o programa principal
+:: Roda o RADAR
 python main.py
 
-pause
-exit 
+:: Mantém janela aberta em caso de erro
+if errorlevel 1 pause
+
+endlocal 
