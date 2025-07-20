@@ -119,19 +119,23 @@ def main():
 
         # Fase 3: Documentação
         print_phase("Documentando")
-        docs = business.generate_overview(files, analysis)
+        overview = business.generate_overview(files, analysis)
+        core_files = business.analyze_core_files(files[:len(files)//5], analysis)  # Top 20%
         print_success("Documentação gerada")
 
         # Fase 4: Tradução
         print_phase("Finalizando")
-        final_docs = translator.translate_documentation(docs)
+        translated_overview = translator.translate_documentation(overview)
+        translated_core_files = {
+            path: translator.translate_documentation(analysis)
+            for path, analysis in core_files.items()
+        }
         
         # Salva documentação
         output_dir = doc_agent.save_documentation(
-            overview=final_docs["overview"],
-            core_files_analysis=final_docs["core_files"],
-            base_dir=repo_path,
-            translator=translator
+            overview=translated_overview,
+            core_files_analysis=translated_core_files,
+            base_dir=repo_path
         )
         print_success("Tudo pronto!")
         
