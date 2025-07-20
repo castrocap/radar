@@ -1,4 +1,4 @@
-@echo off
+@echo on
 chcp 65001 > nul
 title RADAR - Análise de Código
 color 0F
@@ -16,6 +16,7 @@ pause
 exit /b 1
 
 :: Verifica se está no diretório correto
+echo Verificando diretório...
 cd /d "%~dp0"
 
 cls
@@ -25,6 +26,7 @@ echo ========================================================
 echo.
 
 :: Lista arquivos necessários
+echo Verificando arquivos...
 set "arquivos_necessarios=main.py agents.py requirements.txt"
 set "faltando="
 
@@ -47,16 +49,20 @@ if not "!faltando!"=="" (
 )
 
 :: Verifica Python
-echo Verificando ambiente...
-python --version > nul 2>&1
+echo Verificando Python...
+python --version
 if errorlevel 1 (
     call :erro "Python não encontrado! Instale Python 3.9 ou superior."
 )
 
-:: Ativa ambiente virtual
+:: Verifica ambiente virtual
+echo Verificando ambiente virtual...
 if exist guruenv\Scripts\activate.bat (
     echo Ativando ambiente virtual...
     call guruenv\Scripts\activate.bat
+    if errorlevel 1 (
+        call :erro "Falha ao ativar ambiente virtual!"
+    )
 ) else (
     echo Configurando novo ambiente...
     python -m venv guruenv
@@ -64,11 +70,27 @@ if exist guruenv\Scripts\activate.bat (
         call :erro "Falha ao criar ambiente virtual!"
     )
     call guruenv\Scripts\activate.bat
+    if errorlevel 1 (
+        call :erro "Falha ao ativar ambiente virtual!"
+    )
     echo Instalando dependências...
     pip install -r requirements.txt
     if errorlevel 1 (
         call :erro "Falha ao instalar dependências!"
     )
+)
+
+:: Verifica .env
+echo Verificando configuração...
+if not exist .env (
+    echo [AVISO] Arquivo .env não encontrado!
+    echo Criando arquivo .env...
+    echo GOOGLE_API_KEY=sua_chave_aqui> .env
+    echo.
+    echo Configure sua chave da API no arquivo .env e rode novamente.
+    echo.
+    pause
+    exit /b 1
 )
 
 :: Roda o RADAR
@@ -77,7 +99,7 @@ echo Iniciando análise...
 echo.
 
 :: Executa com saída detalhada
-python main.py 2>&1
+python main.py
 if errorlevel 1 (
     echo.
     echo [ERRO] O RADAR encontrou um problema! Veja os detalhes acima.
