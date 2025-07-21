@@ -6,31 +6,36 @@ from dotenv import load_dotenv
 from agents import ExplorerAgent, CodeAnalyzerAgent, BusinessAnalystAgent, DocumentationAgent, TranslatorAgent
 
 def print_header():
-    print("\n" + "=" * 70)
-    print("RADAR - Análise de Código".center(70))
-    print("=" * 70 + "\n")
-    print("Vamos analisar seu código e gerar uma documentação completa.")
-    print("É rápido e fácil.\n")
+    print("\n" + "═" * 70)
+    print("RADAR - Análise Inteligente de Código".center(70))
+    print("═" * 70 + "\n")
+    print("Transformando seu código em documentação clara e objetiva.".center(70))
+    print("Powered by Google Gemini".center(70) + "\n")
 
 def print_progress(phase, message, progress=None):
     if progress is None:
         print(f"→ {message}")
     else:
-        print(f"→ {message} ({progress}%)")
+        bar_length = 40
+        filled = int(progress * bar_length / 100)
+        bar = "█" * filled + "░" * (bar_length - filled)
+        print(f"\r→ {message} [{bar}] {progress:.1f}%", end="", flush=True)
 
 def print_success(message):
-    print(f"✓ {message}\n")
+    print(f"\n✓ {message}")
 
 def print_phase(name):
-    print("\n" + "-" * 70)
-    print(f" {name} ".center(70, "-"))
-    print("-" * 70 + "\n")
+    print("\n" + "─" * 70)
+    print(f" {name} ".center(70, "─"))
+    print("─" * 70 + "\n")
 
 def print_completion(output_dir):
-    print("\nPronto! Sua documentação está em:")
-    print(f"  {output_dir}/")
-    print("  ├─ VISAO_GERAL.md")
-    print("  └─ componentes/\n")
+    print("\n" + "═" * 70)
+    print(" Documentação Gerada com Sucesso! ".center(70))
+    print("═" * 70 + "\n")
+    print(f"📁 Diretório: {output_dir}/")
+    print("   ├─ VISAO_GERAL.md  - Resumo e estrutura do projeto")
+    print("   └─ componentes/    - Análise detalhada dos arquivos\n")
 
 def open_documentation(output_dir):
     """Abre os arquivos gerados na IDE preferencial"""
@@ -89,13 +94,11 @@ def main():
     print_header()
     
     # Verifica ambiente
-    print("Verificando ambiente...")
     if not check_environment():
         return
-    print_success("Tudo certo!")
 
     # Pega caminho do repositório
-    repo_path = input("Qual pasta você quer analisar? ")
+    repo_path = input("\n📂 Digite o caminho do projeto para análise: ")
     print()
 
     try:
@@ -108,89 +111,58 @@ def main():
         doc_agent = DocumentationAgent()
 
         # Fase 1: Exploração
-        print_phase("Explorando")
+        print_phase("Mapeando Estrutura")
         files = explorer.scan_directory(repo_path)
-        print_success(f"Encontrei {len(files)} arquivos importantes")
+        print_success(f"Identificados {len(files)} arquivos relevantes")
 
         # Fase 2: Análise
-        print_phase("Analisando")
+        print_phase("Analisando Código")
         analysis = analyzer.analyze_codebase(files)
-        print_success("Análise completa")
+        print_success("Análise técnica concluída")
 
         # Fase 3: Documentação
-        print_phase("Documentando")
+        print_phase("Gerando Documentação")
         
         # Gera visão geral
         overview = business.generate_overview(files, analysis)
         
         # Analisa arquivos principais (top 20%)
-        print("Analisando componentes principais...")
+        print("Processando componentes principais...")
         core_files = {}
         total_core = len(files) // 5  # Top 20%
         for i, file_info in enumerate(files[:total_core]):
             progress = ((i + 1) / total_core) * 100
-            print(f"\rProgresso: {progress:.1f}% ({i+1}/{total_core})", end="", flush=True)
+            print_progress("Analisando", f"Arquivo {i+1}/{total_core}", progress)
             
             try:
                 file_analysis = business.analyze_core_file(file_info, analysis)
-                core_files[file_info["relative_path"]] = file_analysis
+                translated = translator.translate_documentation(file_analysis)
+                core_files[file_info["relative_path"]] = translated
             except Exception as e:
-                print(f"\nFalha ao analisar {file_info['relative_path']}: {e}")
+                print(f"\nErro ao analisar {file_info['relative_path']}: {e}")
         
         print("\n✓ Análise dos componentes concluída")
-        print_success("Documentação gerada")
 
-        # Fase 4: Tradução
-        print_phase("Finalizando")
+        # Traduz e salva
+        overview_pt = translator.translate_documentation(overview)
+        output_dir = doc_agent.save_documentation(
+            overview=overview_pt,
+            core_files_analysis=core_files,
+            base_dir=repo_path
+        )
         
-        print("Traduzindo documentação...")
-        try:
-            translated_overview = translator.translate_documentation(overview)
-            print("✓ Visão geral traduzida")
-            
-            print("\nTraduzindo análises de componentes...")
-            translated_core_files = {}
-            total_files = len(core_files)
-            for i, (path, analysis) in enumerate(core_files.items()):
-                progress = ((i + 1) / total_files) * 100
-                print(f"\rProgresso: {progress:.1f}% ({i+1}/{total_files})", end="", flush=True)
-                translated_core_files[path] = translator.translate_documentation(analysis)
-            print("\n✓ Análises traduzidas")
-            
-        except Exception as e:
-            print(f"\n❌ Erro na tradução: {str(e)}")
-            raise
-        
-        # Salva documentação
-        print("\nSalvando documentação...")
-        try:
-            output_dir = doc_agent.save_documentation(
-                overview=translated_overview,
-                core_files_analysis=translated_core_files,
-                base_dir=repo_path
-            )
-            print(f"✓ Documentação salva em: {output_dir}")
-            
-        except Exception as e:
-            print(f"\n❌ Erro ao salvar documentação: {str(e)}")
-            raise
-        
-        print_success("Tudo pronto!")
         print_completion(output_dir)
         
         # Abre documentação na IDE
-        print("\nAbrindo documentação...")
         try:
             open_documentation(output_dir)
-            print("✓ Arquivos abertos na sua IDE")
+            print("✓ Documentação aberta no seu editor")
         except Exception as e:
-            print(f"\n⚠️ Não foi possível abrir os arquivos: {str(e)}")
-            print("  Você pode encontrar a documentação em:")
-            print(f"  {output_dir}")
+            print(f"\n⚠️ Não foi possível abrir automaticamente: {output_dir}")
 
     except Exception as e:
-        print(f"\n❌ Ops! Algo deu errado: {str(e)}")
-        print("   Se o problema persistir, fale com o time de tecnologia.")
+        print(f"\n❌ Erro inesperado: {str(e)}")
+        print("   Por favor, entre em contato com o time de tecnologia.")
         return
 
 if __name__ == "__main__":

@@ -17,11 +17,34 @@ class ExplorerAgent(Agent):
                          '.sql', '.js', '.ts', '.html', '.css', '.yaml', '.yml', 
                          '.ini', '.cfg', '.conf', '.sh', '.bat', '.ps1'}
         
-        # Directories to ignore
+        # Directories to ignore (expanded)
         ignore_dirs = {
-            '.venv', 'venv', 'env', '__pycache__', 'node_modules',
-            '.git', '.idea', '.vscode', 'dist', 'build', 'site-packages',
-            'RADAR'  # Ignore our own output directory
+            # Ambiente virtual e cache
+            '.venv', 'venv', 'env', 'guruenv', '__pycache__', 
+            # Dependências e builds
+            'node_modules', 'dist', 'build', 'site-packages',
+            # Controle de versão e IDEs
+            '.git', '.idea', '.vscode', '.hg', '.svn',
+            # Diretórios específicos do RADAR
+            'RADAR', 'output',
+            # Diretórios de teste e documentação
+            'tests', 'test', 'docs', 'documentation',
+            # Diretórios de cache e temporários
+            '.pytest_cache', '.mypy_cache', '.coverage', 'tmp', 'temp'
+        }
+
+        # Arquivos para ignorar
+        ignore_files = {
+            # Arquivos de ambiente e configuração
+            '.env', '.env.example', 'pyvenv.cfg',
+            # Arquivos de dependência
+            'requirements.txt', 'package.json', 'package-lock.json',
+            # Arquivos de IDE e editor
+            '.editorconfig', '.gitignore', '.gitattributes',
+            # Arquivos de cache
+            '.DS_Store', 'Thumbs.db',
+            # Arquivos de log
+            '*.log', '*.pyc', '*.pyo', '*.pyd'
         }
 
         if not os.path.isdir(path):
@@ -32,9 +55,13 @@ class ExplorerAgent(Agent):
 
         for root, dirs, files in os.walk(path):
             # Remove ignored directories
-            dirs[:] = [d for d in dirs if d not in ignore_dirs]
+            dirs[:] = [d for d in dirs if d not in ignore_dirs and not d.startswith('.')]
             
             for file in files:
+                # Ignora arquivos específicos
+                if file in ignore_files or any(file.endswith(pat.replace('*', '')) for pat in ignore_files if '*' in pat):
+                    continue
+
                 processed_files += 1
                 if processed_files % 10 == 0:  # Update progress every 10 files
                     progress = (processed_files / total_files) * 100
